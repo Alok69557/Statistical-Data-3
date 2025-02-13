@@ -1,0 +1,116 @@
+# Function to summarize a data frame or a vector
+summarize_data <- function(data, group_var = NULL) {
+
+  if (is.vector(data)) { # Handling vectors
+    if (is.numeric(data)) {
+      summary_stats <- data.frame(
+        N = length(data),
+        Mean = mean(data, na.rm = TRUE),
+        Median = median(data, na.rm = TRUE),
+        SD = sd(data, na.rm = TRUE),
+        Min = min(data, na.rm = TRUE),
+        Max = max(data, na.rm = TRUE),
+        Q1 = quantile(data, 0.25, na.rm = TRUE),
+        Q3 = quantile(data, 0.75, na.rm = TRUE)
+      )
+      rownames(summary_stats) <- "Summary"  # Add a row name for clarity
+      return(summary_stats)
+    } else if (is.factor(data) || is.character(data)) { # Categorical data
+      counts <- table(data)
+      summary_stats <- data.frame(
+        Category = names(counts),
+        Count = as.numeric(counts),
+        Percentage = round(prop.table(counts) * 100, 2)
+      )
+      return(summary_stats)
+    } else {
+      return("Data type not supported for summarization.")
+    }
+  } else if (is.data.frame(data)) { # Handling data frames
+    if (!is.null(group_var)) { # Grouped summary
+      if (group_var %in% names(data)) {
+        summary_list <- by(data[, names(data) != group_var], data[[group_var]], function(x) {
+          apply(x, 2, function(y) {
+            if (is.numeric(y)) {
+              c(
+                N = length(y),
+                Mean = mean(y, na.rm = TRUE),
+                Median = median(y, na.rm = TRUE),
+                SD = sd(y, na.rm = TRUE),
+                Min = min(y, na.rm = TRUE),
+                Max = max(y, na.rm = TRUE),
+                Q1 = quantile(y, 0.25, na.rm = TRUE),
+                Q3 = quantile(y, 0.75, na.rm = TRUE)
+              )
+            } else if (is.factor(y) || is.character(y)) {
+              counts <- table(y)
+              paste(names(counts), ":", counts, collapse = ", ") # Concise categorical summary
+            } else {
+              "Not numeric or factor"
+            }
+          })
+        })
+        return(summary_list)
+      } else {
+        return("Grouping variable not found in data frame.")
+      }
+
+
+    } else { # Ungrouped summary of data frame
+      summary_stats <- apply(data, 2, function(x) {
+        if (is.numeric(x)) {
+            c(
+              N = length(x),
+              Mean = mean(x, na.rm = TRUE),
+              Median = median(x, na.rm = TRUE),
+              SD = sd(x, na.rm = TRUE),
+              Min = min(x, na.rm = TRUE),
+              Max = max(x, na.rm = TRUE),
+              Q1 = quantile(x, 0.25, na.rm = TRUE),
+              Q3 = quantile(x, 0.75, na.rm = TRUE)
+            )
+        } else if (is.factor(x) || is.character(x)) {
+          counts <- table(x)
+          paste(names(counts), ":", counts, collapse = ", ") # Concise categorical summary
+        } else {
+          "Not numeric or factor"
+        }
+      })
+        return(t(summary_stats)) # Transpose to have variables as columns
+    }
+  } else {
+    return("Data type not supported. Please provide a vector or data frame.")
+  }
+}
+
+
+
+# Example Usage:
+
+# For a vector:
+my_vector <- c(1, 2, 3, 4, 5, NA, 2, 3, 4)
+summary_vector <- summarize_data(my_vector)
+print(summary_vector)
+
+my_categorical_vector <- factor(c("A", "B", "A", "C", "B", "A"))
+summary_cat_vector <- summarize_data(my_categorical_vector)
+print(summary_cat_vector)
+
+# For a data frame (ungrouped):
+my_df <- data.frame(
+  A = c(1, 2, 3, 4, 5),
+  B = c(6, 7, 8, 9, 10),
+  C = factor(c("X", "Y", "X", "Z", "Y"))
+)
+summary_df <- summarize_data(my_df)
+print(summary_df)
+
+# For a data frame (grouped):
+summary_grouped <- summarize_data(my_df, group_var = "C")
+print(summary_grouped)
+
+
+# Example with missing values:
+my_vector_na <- c(1, 2, NA, 4, 5)
+summary_na <- summarize_data(my_vector_na)
+print(summary_na)
