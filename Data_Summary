@@ -114,3 +114,55 @@ print(summary_grouped)
 my_vector_na <- c(1, 2, NA, 4, 5)
 summary_na <- summarize_data(my_vector_na)
 print(summary_na)
+# Function to summarize a data frame or a vector
+summarize_data <- function(data, group_var = NULL, print_data = FALSE) {
+
+  if (print_data) {  # Print the data if requested
+    print(data)
+  }
+
+  if (is.vector(data)) { # Handling vectors
+    # ... (rest of the vector handling code remains the same)
+  } else if (is.data.frame(data)) { # Handling data frames
+    if (!is.null(group_var)) { # Grouped summary
+       # ... (rest of the grouped data frame code remains the same)
+    } else { # Ungrouped summary of data frame
+      # ... (rest of the ungrouped data frame code remains the same)
+    }
+  } else {
+    return("Data type not supported. Please provide a vector or data frame.")
+  }
+}
+
+
+
+# Example Usage:
+
+# For a vector:
+my_vector <- c(1, 2, 3, 4, 5, NA, 2, 3, 4)
+summary_vector <- summarize_data(my_vector, print_data = TRUE) # Print the vector
+print(summary_vector)
+
+my_categorical_vector <- factor(c("A", "B", "A", "C", "B", "A"))
+summary_cat_vector <- summarize_data(my_categorical_vector, print_data = TRUE) # Print the vector
+print(summary_cat_vector)
+
+
+# For a data frame (ungrouped):
+my_df <- data.frame(
+  A = c(1, 2, 3, 4, 5),
+  B = c(6, 7, 8, 9, 10),
+  C = factor(c("X", "Y", "X", "Z", "Y"))
+)
+summary_df <- summarize_data(my_df, print_data = TRUE) # Print the data frame
+print(summary_df)
+
+# For a data frame (grouped):
+summary_grouped <- summarize_data(my_df, group_var = "C", print_data = TRUE) # Print the data frame
+print(summary_grouped)
+
+
+# Example with missing values:
+my_vector_na <- c(1, 2, NA, 4, 5)
+summary_na <- summarize_data(my_vector_na, print_data = TRUE) # Print the vector
+print(summary_na)
